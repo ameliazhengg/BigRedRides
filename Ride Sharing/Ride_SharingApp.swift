@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-@main
+
 struct Ride_SharingApp: App {
     var body: some Scene {
         WindowGroup {
