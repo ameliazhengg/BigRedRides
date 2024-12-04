@@ -43,6 +43,7 @@ def create_ride():
             destination=body["destination"],
             time=body["time"],
             seats=body["seats"],
+            price=body["price"],
             info=body.get("info")
         )
         db.session.add(new_ride)
