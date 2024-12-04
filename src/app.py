@@ -21,13 +21,13 @@ def failure_response(message, code=404):
 
 # Routes
 # Get all rides
-@app.route("/rides", methods=["GET"])
+@app.route("/rides/", methods=["GET"])
 def get_all_rides():
     rides = Ride.query.all()
     return success_response([ride.serialize() for ride in rides])
 
 # Get a specific ride
-@app.route("/rides/<int:ride_id>", methods=["GET"])
+@app.route("/rides/<int:ride_id>/", methods=["GET"])
 def get_ride(ride_id):
     ride = Ride.query.get(ride_id)
     if not ride:
@@ -35,7 +35,7 @@ def get_ride(ride_id):
     return success_response(ride.serialize())
 
 # Create a new ride
-@app.route("/rides", methods=["POST"])
+@app.route("/rides/", methods=["POST"])
 def create_ride():
     body = request.json
     try:
@@ -63,7 +63,7 @@ def create_ride():
         return failure_response(str(e))
 
 # Update a ride 
-@app.route("/rides/<int:ride_id>", methods=["PATCH"])
+@app.route("/rides/<int:ride_id>/", methods=["PATCH"])
 def update_ride(ride_id):
     ride = Ride.query.get(ride_id)
     if not ride:
@@ -98,7 +98,7 @@ def update_ride(ride_id):
         return failure_response(str(e))
 
 # Delete a ride
-@app.route("/rides/<int:ride_id>", methods=["DELETE"])
+@app.route("/rides/<int:ride_id>/", methods=["DELETE"])
 def delete_ride(ride_id):
     ride = Ride.query.get(ride_id)
     if not ride:
@@ -108,33 +108,50 @@ def delete_ride(ride_id):
     return success_response({"message": "Ride deleted successfully."})
 
 # Create a new user
-@app.route("/users", methods=["POST"])
+@app.route("/users/", methods=["POST"])
 def create_user():
     body = request.json
+    email = body.get("email")
+
+    # Check if email already exists
+    existing_user = User.query.filter_by(email=email).first()
+    if existing_user:
+        return failure_response("Email already exists.", 400)
+
+    # Proceed to create the user
     try:
-        new_user = User(
-            name=body["name"],
-            email=body["email"],
-            role=body.get("role", "rider"),
-        )
+        name = body["name"]
+        role = body["role"]
+        new_user = User(name=name, email=email, role=role)
         db.session.add(new_user)
         db.session.commit()
         return success_response(new_user.serialize(), 201)
     except KeyError as e:
         return failure_response(f"Missing field: {str(e)}", 400)
     except Exception as e:
-        return failure_response(str(e))
+        return failure_response(str(e), 500)
+
 
 # Get a specific user
-@app.route("/users/<int:user_id>", methods=["GET"])
+@app.route("/users/<int:user_id>/", methods=["GET"])
 def get_user(user_id):
     user = User.query.get(user_id)
     if not user:
         return failure_response("User not found.")
     return success_response(user.serialize())
 
+
+# Get all trips
+@app.route("/trips/", methods=["GET"])
+def get_all_trips():
+    try:
+        trips = Trip.query.all()  # Fetch all trips from the database
+        return success_response({"trips": [trip.serialize() for trip in trips]})
+    except Exception as e:
+        return failure_response(str(e), 500)
+
 # Add a user to a trip
-@app.route("/trips", methods=["POST"])
+@app.route("/trips/", methods=["POST"])
 def add_user_to_trip():
     body = request.json
     try:
@@ -173,8 +190,9 @@ def add_user_to_trip():
         return failure_response(f"Missing field: {str(e)}", 400)
     except Exception as e:
         return failure_response(str(e))
-    
-@app.route("/trips/<int:trip_id>", methods=["DELETE"])
+  
+# Remove a user from a trip
+@app.route("/trips/<int:trip_id>/", methods=["DELETE"])
 def delete_user_from_trip(trip_id):
     body = request.json
     user_id = body.get("user_id")
@@ -200,7 +218,7 @@ def delete_user_from_trip(trip_id):
     return success_response({"message": "User removed from trip successfully."})
 
 # Update waitlist for a ride
-@app.route("/rides/<int:ride_id>/waitlist", methods=["POST"])
+@app.route("/rides/<int:ride_id>/waitlist/", methods=["POST"])
 def update_waitlist_for_ride(ride_id):
     body = request.json
     user_id = body.get("user_id")
@@ -222,7 +240,7 @@ def update_waitlist_for_ride(ride_id):
     return success_response({"message": "Waitlist updated successfully."})
 
 # Get trips based on user_id
-@app.route("/users/<int:user_id>/trips", methods=["GET"])
+@app.route("/users/<int:user_id>/trips/", methods=["GET"])
 def get_trips_by_user(user_id):
     user = User.query.get(user_id)
     if not user:
