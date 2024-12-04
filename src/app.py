@@ -115,9 +115,13 @@ def delete_ride(ride_id):
     ride = Ride.query.get(ride_id)
     if not ride:
         return failure_response("Ride not found.")
+    
+    associated_trips = Trip.query.filter_by(ride_id=ride_id).all()
+    for trip in associated_trips:
+        db.session.delete(trip)
+
     db.session.delete(ride)
     db.session.commit()
-
 
     return success_response({"message": "Ride deleted successfully."})
 
@@ -238,7 +242,7 @@ def delete_user_from_trip(trip_id):
 
     # Check waitlist, create trip if exists
     if ride.waitlist:
-        new_user = ride.waitlist.pop()
+        new_user = ride.waitlist.pop(0)
     
         new_trip = Trip(ride_id=ride.id, user_id=new_user.id, role="rider", status="confirmed")
         ride.seats -= 1  # Reduce available seats
