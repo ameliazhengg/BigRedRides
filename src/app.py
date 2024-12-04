@@ -118,7 +118,7 @@ def delete_ride(ride_id):
     db.session.delete(ride)
     db.session.commit()
 
-    
+
     return success_response({"message": "Ride deleted successfully."})
 
 # Create a new user
@@ -188,6 +188,8 @@ def add_user_to_trip():
         # Create a new trip
         new_trip = Trip(ride_id=ride_id, user_id=user_id, role="rider", status="confirmed")
         ride.seats -= 1  # Reduce available seats
+        if ride.seats == 0:
+            ride.status = "full"
         db.session.add(new_trip)
         db.session.commit()
 
@@ -228,6 +230,8 @@ def delete_user_from_trip(trip_id):
     ride = Ride.query.get(trip.ride_id)
     if ride:
         ride.seats += 1
+        if ride.status == "full":
+            ride.status = "open"
 
     db.session.delete(trip)
     db.session.commit()
