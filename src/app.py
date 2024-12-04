@@ -92,3 +92,46 @@ def get_user(user_id):
     if not user:
         return failure_response("User not found.")
     return success_response(user.serialize())
+
+
+@app.route("/trips", methods=["POST"])
+def create_trip():
+    body = request.json
+    try:
+        new_trip = Trip(
+            driver_id=body["driver_id"],
+            rider_id=body["rider_id"],
+            status=body["status"]
+        )
+        db.session.add(new_trip)
+        db.session.commit()
+        return success_response(new_trip.serialize(), 201)
+    except Exception as e:
+        return failure_response(str(e))
+
+@app.route("/trips/<int:user_id>", methods=["GET"])
+def get_trips_by_user(user_id):
+    trips = Trip.query.filter((Trip.driver_id == user_id) | (Trip.rider_id == user_id)).all()
+    return success_response([trip.serialize() for trip in trips])
+
+@app.route("/trips/<int:trip_id>", methods=["DELETE"])
+def delete_trip(trip_id):
+    trip = Trip.query.get(trip_id)
+    if not trip:
+        return failure_response("Trip not found.")
+    db.session.delete(trip)
+    db.session.commit()
+    return success_response({"message": "Trip deleted successfully."})
+
+@app.route("/trips/<int:user_id>/waitlist", methods=["POST"])
+def update_waitlist(user_id):
+    body = request.json
+    ride_id = body.get("ride_id")
+    ride = Ride.query.get(ride_id)
+    if not ride:
+        return failure_response("Ride not found.")
+    # Add waitlist logic here (if needed)
+    return success_response({"message": "Waitlist updated successfully."})
+
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=8000, debug=True)
