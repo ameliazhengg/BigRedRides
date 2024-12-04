@@ -74,3 +74,21 @@ def delete_ride(ride_id):
     db.session.delete(ride)
     db.session.commit()
     return success_response({"message": "Ride deleted successfully."})
+
+@app.route("/users", methods=["POST"])
+def create_user():
+    body = request.json
+    try:
+        new_user = User(name=body["name"], email=body["email"])
+        db.session.add(new_user)
+        db.session.commit()
+        return success_response(new_user.serialize(), 201)
+    except Exception as e:
+        return failure_response(str(e))
+
+@app.route("/users/<int:user_id>", methods=["GET"])
+def get_user(user_id):
+    user = User.query.get(user_id)
+    if not user:
+        return failure_response("User not found.")
+    return success_response(user.serialize())
