@@ -15,19 +15,16 @@ class User(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     name = db.Column(db.String, nullable=False)
     email = db.Column(db.String, nullable=False, unique=True)
-    role = db.Column(db.String, nullable=False)  # 'driver', 'rider', or 'both'
 
     def __init__(self, **kwargs):
         self.name = kwargs.get("name")
         self.email = kwargs.get("email")
-        self.role = kwargs.get("role", "rider")  # Default to 'rider'
 
     def serialize(self):
         return {
             "id": self.id,
             "name": self.name,
             "email": self.email,
-            "role": self.role,
         }
 
 class Ride(db.Model):
@@ -78,11 +75,13 @@ class Trip(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     ride_id = db.Column(db.Integer, db.ForeignKey("rides.id"), nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
+    role = db.Column(db.String, nullable=False)  # 'driver' or 'rider'
     status = db.Column(db.String, nullable=False)  # 'confirmed' or 'waitlisted'
 
     def __init__(self, **kwargs):
         self.ride_id = kwargs.get("ride_id")
         self.user_id = kwargs.get("user_id")
+        self.role = kwargs.get("role")
         self.status = kwargs.get("status", "confirmed")  # Default to 'confirmed'
 
     def serialize(self):
@@ -90,6 +89,7 @@ class Trip(db.Model):
             "id": self.id,
             "ride_id": self.ride_id,
             "user_id": self.user_id,
+            "role": self.role,
             "status": self.status,
         }
 

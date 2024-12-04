@@ -41,7 +41,13 @@ def create_ride():
     try:
         # Parse the time string into a Python datetime object
         time = datetime.fromisoformat(body["time"])  # Converts "2024-12-04T10:30:00" to a datetime object
-
+        
+        # Check if user exists
+        id = body.get("driver_id")
+        existing_user = User.query.filter_by(id=id).first()
+        if existing_user is None:
+            return failure_response("Driver does not exist.", 400)
+        
         # Create a new ride object
         new_ride = Ride(
             driver_id=body["driver_id"],
@@ -54,6 +60,12 @@ def create_ride():
         )
         db.session.add(new_ride)
         db.session.commit()
+
+        # Create a new trip
+        new_trip = Trip(ride_id=new_ride.id, user_id=id, role="driver", status="confirmed")
+        db.session.add(new_trip)
+        db.session.commit()
+
         return success_response(new_ride.serialize(), 201)
     except KeyError as e:
         return failure_response(f"Missing field: {str(e)}", 400)
@@ -105,6 +117,8 @@ def delete_ride(ride_id):
         return failure_response("Ride not found.")
     db.session.delete(ride)
     db.session.commit()
+
+    
     return success_response({"message": "Ride deleted successfully."})
 
 # Create a new user
@@ -121,8 +135,7 @@ def create_user():
     # Proceed to create the user
     try:
         name = body["name"]
-        role = body["role"]
-        new_user = User(name=name, email=email, role=role)
+        new_user = User(name=name, email=email)
         db.session.add(new_user)
         db.session.commit()
         return success_response(new_user.serialize(), 201)
@@ -173,7 +186,7 @@ def add_user_to_trip():
             return failure_response("No seats available.")
 
         # Create a new trip
-        new_trip = Trip(ride_id=ride_id, user_id=user_id, status="confirmed")
+        new_trip = Trip(ride_id=ride_id, user_id=user_id, role="rider", status="confirmed")
         ride.seats -= 1  # Reduce available seats
         db.session.add(new_trip)
         db.session.commit()
@@ -207,6 +220,9 @@ def delete_user_from_trip(trip_id):
     # Verify the user is part of the trip
     if trip.user_id != user_id:
         return failure_response("User does not belong to this trip.", 400)
+    
+    if trip.role == "driver":
+        return failure_response("Cannot remove driver from trip.", 400)
 
     # Restore seat to the ride
     ride = Ride.query.get(trip.ride_id)
