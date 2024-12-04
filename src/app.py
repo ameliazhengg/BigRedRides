@@ -235,6 +235,19 @@ def delete_user_from_trip(trip_id):
 
     db.session.delete(trip)
     db.session.commit()
+
+    # Check waitlist, create trip if exists
+    if ride.waitlist:
+        new_user = ride.waitlist.pop()
+    
+        new_trip = Trip(ride_id=ride.id, user_id=new_user.id, role="rider", status="confirmed")
+        ride.seats -= 1  # Reduce available seats
+        ride.status = "full"
+        db.session.add(new_trip)
+        db.session.commit()
+        return success_response({"message": "User removed from trip successfully. Waitlist updated."})
+
+
     return success_response({"message": "User removed from trip successfully."})
 
 # Update waitlist for a ride
