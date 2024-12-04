@@ -17,48 +17,75 @@ struct CreateRideView: View {
     var body: some View {
         NavigationView {
             Form {
-                Section(header: Text("Ride Details")) {
-                    // Destination picker
-                    Picker("Destination", selection: $destination) {
-                        Text("Select destination").tag("")
-                        ForEach(commonDestinations, id: \.self) { dest in
-                            Text(dest).tag(dest)
+                Section {
+                    // Visual route indicator
+                    HStack(spacing: 20) {
+                        VStack(alignment: .leading, spacing: 20) {
+                            LocationField(
+                                icon: "location.fill",
+                                title: "From",
+                                location: $departureLocation,
+                                options: commonLocations
+                            )
+                            
+                            LocationField(
+                                icon: "mappin.circle.fill",
+                                title: "To",
+                                location: $destination,
+                                options: commonDestinations
+                            )
                         }
                     }
-                    
-                    // Custom destination if not in common list
-                    if !commonDestinations.contains(destination) {
-                        TextField("Custom destination", text: $destination)
-                    }
-                    
-                    // Departure location picker
-                    Picker("Departure Location", selection: $departureLocation) {
-                        Text("Select pickup location").tag("")
-                        ForEach(commonLocations, id: \.self) { loc in
-                            Text(loc).tag(loc)
-                        }
-                    }
-                    
-                    // Custom location if not in common list
-                    if !commonLocations.contains(departureLocation) {
-                        TextField("Custom pickup location", text: $departureLocation)
-                    }
-                    
+                    .padding(.vertical, 10)
+                }
+                .listRowBackground(
+                    RoundedRectangle(cornerRadius: 10)
+                        .fill(Color(.systemBackground))
+                        .shadow(radius: 2)
+                        .padding(.vertical, 5)
+                )
+                
+                Section {
                     DatePicker("Departure Time", selection: $departureTime, in: Date()...)
+                        .datePickerStyle(.graphical)
                 }
+                .listRowBackground(
+                    RoundedRectangle(cornerRadius: 10)
+                        .fill(Color(.systemBackground))
+                        .shadow(radius: 2)
+                        .padding(.vertical, 5)
+                )
                 
-                Section(header: Text("Price and Seats")) {
-                    TextField("Price ($)", text: $price)
-                        .keyboardType(.decimalPad)
-                    
-                    TextField("Available Seats", text: $availableSeats)
-                        .keyboardType(.numberPad)
+                Section {
+                    HStack {
+                        PriceField(price: $price)
+                        Divider()
+                            .frame(height: 30)
+                        SeatsField(seats: $availableSeats)
+                    }
                 }
+                .listRowBackground(
+                    RoundedRectangle(cornerRadius: 10)
+                        .fill(Color(.systemBackground))
+                        .shadow(radius: 2)
+                        .padding(.vertical, 5)
+                )
                 
-                Section(header: Text("Additional Information")) {
-                    TextEditor(text: $description)
-                        .frame(height: 100)
+                Section {
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("Additional Information")
+                            .font(.subheadline)
+                            .foregroundColor(.gray)
+                        TextEditor(text: $description)
+                            .frame(height: 100)
+                    }
                 }
+                .listRowBackground(
+                    RoundedRectangle(cornerRadius: 10)
+                        .fill(Color(.systemBackground))
+                        .shadow(radius: 2)
+                        .padding(.vertical, 5)
+                )
             }
             .navigationTitle("Create Ride")
             .navigationBarItems(
@@ -69,6 +96,7 @@ struct CreateRideView: View {
                     createRide()
                 }
                 .disabled(!isFormValid)
+                .font(.headline)
             )
         }
     }
@@ -96,5 +124,67 @@ struct CreateRideView: View {
         )
         
         presentationMode.wrappedValue.dismiss()
+    }
+}
+
+struct LocationField: View {
+    let icon: String
+    let title: String
+    @Binding var location: String
+    let options: [String]
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Label(title, systemImage: icon)
+                .font(.subheadline)
+                .foregroundColor(.gray)
+            
+            Picker(title, selection: $location) {
+                Text("Select location").tag("")
+                ForEach(options, id: \.self) { option in
+                    Text(option).tag(option)
+                }
+            }
+            .pickerStyle(.menu)
+            
+            if !options.contains(location) && !location.isEmpty {
+                TextField("Custom location", text: $location)
+                    .textFieldStyle(.roundedBorder)
+            }
+        }
+    }
+}
+
+struct PriceField: View {
+    @Binding var price: String
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Label("Price", systemImage: "dollarsign.circle.fill")
+                .font(.subheadline)
+                .foregroundColor(.gray)
+            
+            HStack {
+                Text("$")
+                    .foregroundColor(.gray)
+                TextField("0.00", text: $price)
+                    .keyboardType(.decimalPad)
+            }
+        }
+    }
+}
+
+struct SeatsField: View {
+    @Binding var seats: String
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Label("Seats", systemImage: "person.2.fill")
+                .font(.subheadline)
+                .foregroundColor(.gray)
+            
+            TextField("0", text: $seats)
+                .keyboardType(.numberPad)
+        }
     }
 }

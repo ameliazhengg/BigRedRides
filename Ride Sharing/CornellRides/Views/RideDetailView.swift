@@ -7,100 +7,150 @@ struct RideDetailView: View {
     
     var body: some View {
         ScrollView {
-            VStack(alignment: .leading, spacing: 20) {
-                // Header
-                HStack {
-                    Image(systemName: "person.circle.fill")
-                        .resizable()
-                        .frame(width: 60, height: 60)
-                        .foregroundColor(.gray)
-                    
-                    VStack(alignment: .leading) {
-                        Text(ride.driver.name)
-                            .font(.title2)
-                            .bold()
-                        Text(ride.driver.email)
-                            .font(.subheadline)
-                            .foregroundColor(.gray)
+            VStack(spacing: 0) {
+                // Top Card: Route & Price
+                VStack(spacing: 12) {
+                    // Route
+                    HStack(spacing: 16) {
+                        VStack(spacing: 4) {
+                            Image(systemName: "mappin.circle.fill")
+                                .font(.system(size: 40))
+                                .foregroundColor(.blue)
+                            Text("To")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        }
+                        
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text(ride.destination)
+                                .font(.title3)
+                                .bold()
+                            Text(ride.departureLocation)
+                                .font(.subheadline)
+                                .foregroundColor(.secondary)
+                        }
+                        Spacer()
                     }
-                }
-                .padding()
-                
-                // Ride Details
-                VStack(alignment: .leading, spacing: 15) {
-                    DetailRow(icon: "mappin.circle.fill",
-                             title: "Destination",
-                             detail: ride.destination)
                     
-                    DetailRow(icon: "location.circle.fill",
-                             title: "Departure",
-                             detail: ride.departureLocation)
+                    Divider()
                     
-                    DetailRow(icon: "clock.fill",
-                             title: "Time",
-                             detail: ride.departureTime.formatted())
-                    
-                    DetailRow(icon: "dollarsign.circle.fill",
-                             title: "Price",
-                             detail: "$\(String(format: "%.2f", ride.price))")
-                    
-                    DetailRow(icon: "person.2.fill",
-                             title: "Available Seats",
-                             detail: "\(ride.availableSeats)")
-                }
-                .padding()
-                
-                // Description
-                VStack(alignment: .leading, spacing: 10) {
-                    Text("Description")
-                        .font(.headline)
-                    Text(ride.description)
-                        .foregroundColor(.gray)
-                }
-                .padding()
-                
-                // Contact Button
-                Button(action: {
-                    showingContactSheet = true
-                }) {
+                    // Price
                     HStack {
-                        Image(systemName: "message.fill")
-                        Text("Contact Driver")
+                        Text("$\(String(format: "%.2f", ride.price))")
+                            .font(.title.bold())
+                            .foregroundColor(.blue)
+                        Text("per person")
+                            .font(.subheadline)
+                            .foregroundColor(.secondary)
+                        Spacer()
                     }
-                    .frame(maxWidth: .infinity)
-                    .padding()
-                    .background(Color.blue)
-                    .foregroundColor(.white)
-                    .cornerRadius(10)
                 }
                 .padding()
+                .background(Color(.systemBackground))
+                
+                // Ride Info
+                VStack(spacing: 20) {
+                    // Time & Seats
+                    HStack(spacing: 30) {
+                        // Date
+                        VStack(spacing: 6) {
+                            Image(systemName: "calendar")
+                                .font(.title2)
+                                .foregroundColor(.orange)
+                            Text(ride.departureTime.formatted(date: .abbreviated, time: .omitted))
+                                .font(.subheadline.bold())
+                        }
+                        
+                        // Time
+                        VStack(spacing: 6) {
+                            Image(systemName: "clock.fill")
+                                .font(.title2)
+                                .foregroundColor(.green)
+                            Text(ride.departureTime.formatted(date: .omitted, time: .shortened))
+                                .font(.subheadline.bold())
+                        }
+                        
+                        // Seats
+                        VStack(spacing: 6) {
+                            Image(systemName: "person.2.fill")
+                                .font(.title2)
+                                .foregroundColor(.purple)
+                            Text("\(ride.availableSeats) seats")
+                                .font(.subheadline.bold())
+                        }
+                    }
+                    .padding(.vertical, 20)
+                    .padding(.horizontal)
+                    .frame(maxWidth: .infinity)
+                    .background(Color(.systemBackground))
+                    .cornerRadius(12)
+                }
+                .padding()
+                .background(Color(.systemGroupedBackground))
+                
+                // Driver Info
+                VStack(alignment: .leading, spacing: 16) {
+                    Text("Driver")
+                        .font(.headline)
+                    
+                    HStack(spacing: 16) {
+                        // Profile Image
+                        if ride.driver.profileImage.hasPrefix("http") {
+                            AsyncImage(url: URL(string: ride.driver.profileImage)) { image in
+                                image
+                                    .resizable()
+                                    .scaledToFill()
+                            } placeholder: {
+                                Image(systemName: "person.circle.fill")
+                                    .font(.system(size: 44))
+                            }
+                            .frame(width: 60, height: 60)
+                            .clipShape(Circle())
+                            .foregroundColor(.gray)
+                        } else {
+                            Image(systemName: "person.circle.fill")
+                                .font(.system(size: 44))
+                                .frame(width: 60, height: 60)
+                                .foregroundColor(.gray)
+                        }
+                        
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text(ride.driver.name)
+                                .font(.headline)
+                            Text(ride.driver.email)
+                                .font(.subheadline)
+                                .foregroundColor(.secondary)
+                        }
+                        Spacer()
+                        
+                        Button(action: { showingContactSheet = true }) {
+                            Image(systemName: "message.circle.fill")
+                                .font(.system(size: 32))
+                                .foregroundColor(.blue)
+                        }
+                    }
+                }
+                .padding()
+                .background(Color(.systemBackground))
+                
+                // Trip Details
+                if !ride.description.isEmpty {
+                    VStack(alignment: .leading, spacing: 12) {
+                        Text("Trip Details")
+                            .font(.headline)
+                        Text(ride.description)
+                            .font(.body)
+                            .foregroundColor(.secondary)
+                    }
+                    .padding()
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .background(Color(.systemBackground))
+                }
             }
         }
         .navigationBarTitleDisplayMode(.inline)
         .sheet(isPresented: $showingContactSheet) {
             ContactSheet(driver: ride.driver)
-        }
-    }
-}
-
-struct DetailRow: View {
-    let icon: String
-    let title: String
-    let detail: String
-    
-    var body: some View {
-        HStack {
-            Image(systemName: icon)
-                .foregroundColor(.blue)
-                .frame(width: 30)
-            
-            VStack(alignment: .leading) {
-                Text(title)
-                    .font(.subheadline)
-                    .foregroundColor(.gray)
-                Text(detail)
-                    .font(.body)
-            }
         }
     }
 }
@@ -113,38 +163,46 @@ struct ContactSheet: View {
         NavigationView {
             List {
                 Section {
-                    HStack {
+                    HStack(spacing: 16) {
                         Image(systemName: "person.circle.fill")
-                            .resizable()
-                            .frame(width: 50, height: 50)
+                            .font(.system(size: 44))
                             .foregroundColor(.gray)
                         
-                        VStack(alignment: .leading) {
+                        VStack(alignment: .leading, spacing: 4) {
                             Text(driver.name)
                                 .font(.headline)
-                            Text(driver.email)
+                            Text("Driver")
                                 .font(.subheadline)
-                                .foregroundColor(.gray)
+                                .foregroundColor(.secondary)
                         }
                     }
+                    .padding(.vertical, 8)
                 }
                 
                 Section {
                     Button(action: {
-                        // Handle phone call
+                        if let url = URL(string: "tel://\(driver.phoneNumber)") {
+                            UIApplication.shared.open(url)
+                        }
                     }) {
-                        HStack {
-                            Image(systemName: "phone.fill")
+                        Label {
                             Text(driver.phoneNumber)
+                        } icon: {
+                            Image(systemName: "phone.circle.fill")
+                                .foregroundColor(.green)
                         }
                     }
                     
                     Button(action: {
-                        // Handle email
+                        if let url = URL(string: "mailto:\(driver.email)") {
+                            UIApplication.shared.open(url)
+                        }
                     }) {
-                        HStack {
-                            Image(systemName: "envelope.fill")
+                        Label {
                             Text(driver.email)
+                        } icon: {
+                            Image(systemName: "envelope.circle.fill")
+                                .foregroundColor(.blue)
                         }
                     }
                 }
