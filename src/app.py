@@ -2,6 +2,7 @@ from db import db, Ride, User, Trip
 from flask import Flask, request
 import json
 from datetime import datetime
+import os
 
 
 app = Flask(__name__)
@@ -20,6 +21,12 @@ def failure_response(message, code=404):
     return json.dumps({"error": message}), code
 
 # Routes
+@app.route("/")
+
+#Base Route
+def base():
+    return "Welcome to Big Red Rides"
+
 # Get all rides
 @app.route("/rides/", methods=["GET"])
 def get_all_rides():
