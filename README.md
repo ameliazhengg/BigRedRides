@@ -8,8 +8,6 @@ Big Red Rides is a ride-sharing app that connects drivers and riders. Users can 
 <img width="321" alt="Screenshot 2024-12-06 at 11 16 29 PM" src="https://github.com/user-attachments/assets/391ffb45-0f6a-4b42-bc8c-7900ca010c0f"><img width="319" alt="Screenshot 2024-12-06 at 11 16 53 PM" src="https://github.com/user-attachments/assets/daffed5d-a5f0-4992-947e-8f9387b6e66c"><img width="312" alt="Screenshot 2024-12-06 at 11 17 15 PM" src="https://github.com/user-attachments/assets/b4ac074f-a64c-4187-91fc-5f28471bc819">
 
 
-<h3>Description </h3>
-
 <h3>Contributors</h3>
 <ul>
   <li>Amelia Zheng</li>
