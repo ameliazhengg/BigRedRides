@@ -73,12 +73,27 @@ struct CreateRideView: View {
                 
                 Section {
                     VStack(alignment: .leading, spacing: 8) {
-                        Text("Additional Information")
+                        Label("Trip Details", systemImage: "text.alignleft")
                             .font(.subheadline)
                             .foregroundColor(.gray)
                         TextEditor(text: $description)
                             .frame(height: 100)
+                            .scrollContentBackground(.hidden)
+                            .background(Color(.systemGray6))
+                            .cornerRadius(8)
+                            .overlay(
+                                Group {
+                                    if description.isEmpty {
+                                        Text("Add any additional details about your trip...")
+                                            .foregroundColor(.gray)
+                                            .padding(.horizontal, 4)
+                                            .padding(.vertical, 8)
+                                    }
+                                },
+                                alignment: .topLeading
+                            )
                     }
+                    .padding(.vertical, 4)
                 }
                 .listRowBackground(
                     RoundedRectangle(cornerRadius: 10)
